@@ -5,7 +5,7 @@ import {
   PlayerRepositoryName,
   RoomRepositoryName,
 } from "../providers/adedanha.provider";
-import { Room } from "@/entities/room.entity";
+import { Room } from "../entities/room.entity";
 
 @Injectable()
 export class PlayerService {
@@ -19,18 +19,23 @@ export class PlayerService {
   ) {}
 
   async findAll(): Promise<Player[]> {
-    return this.playerRepository.find();
+    return await this.playerRepository.find();
   }
 
   async findByUserId(id: string): Promise<Player> {
-    return this.playerRepository.findOne({ where: { id } });
+    return await this.playerRepository.findOne({ where: { id } });
   }
 
   async create(payload: Player): Promise<Player> {
     try {
       const doc = await this.playerRepository.insertOne(payload);
-      const player = this.findByUserId(String(doc.insertedId));
-      return player;
+      if (!doc) return null;
+
+      return new Player(
+        payload.id,
+        payload.name,
+        null,
+      );
     } catch {
       console.log("Duplicate entry");
     }

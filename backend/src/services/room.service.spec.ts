@@ -3,6 +3,7 @@ import { GameModule } from "../modules/adedanha.module";
 import { PlayerService } from "./player.service";
 import { Guid } from "../Dtos/Guid";
 import { RoomService } from "./room.service";
+import { Room } from "../entities/room.entity";
 
 describe("PlayerService", () => {
   let playerService: PlayerService;
@@ -23,33 +24,24 @@ describe("PlayerService", () => {
 
   it("Should create a room", async () => {
     const id = new Guid().value;
-    const invite = new Guid().value;
+    const room = new Room(id);
+    const response = await roomService.create(room);
 
-    await roomService.create({
+    expect(response).toEqual({
       id,
-      invite,
-      players: [],
-    });
-
-    expect(await roomService.findById(id)).toEqual({
-      id,
-      invite,
     });
   });
   it("Should set a room to a player", async () => {
     const id = new Guid().value;
     const room_id = new Guid().value;
+    const room = new Room(room_id);
 
     await playerService.create({
       id,
       name: "Alekinho hub",
       room: null,
     });
-    await roomService.create({
-      id: room_id,
-      invite: "123",
-      players: [],
-    });
+    await roomService.create(room);
 
     const player = await playerService.updatePlayerRoom(id, room_id);
 
@@ -61,13 +53,8 @@ describe("PlayerService", () => {
   });
   it("Should delete room register", async () => {
     const id = new Guid().value;
-    const invite = new Guid().value;
-
-    await roomService.create({
-      id,
-      invite,
-      players: [],
-    });
+    const room = new Room(id);
+    await roomService.create(room);
 
     await playerService.delete(id);
 

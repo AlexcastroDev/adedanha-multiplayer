@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { MongoRepository } from "typeorm";
 import { RoomRepositoryName } from "../providers/adedanha.provider";
-import { Room } from "@/entities/room.entity";
+import { Room } from "../entities/room.entity";
 
 @Injectable()
 export class RoomService {
@@ -22,8 +22,9 @@ export class RoomService {
   async create(payload: Room): Promise<Room> {
     try {
       const doc = await this.roomRepository.insertOne(payload);
-      const room = this.findById(String(doc.insertedId));
-      return room;
+      if (!doc) return null;
+
+      return new Room(payload.id);
     } catch {
       console.log("Duplicate entry");
     }

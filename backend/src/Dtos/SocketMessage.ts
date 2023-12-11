@@ -4,6 +4,16 @@ export class SocketMessage {
   static text(message: any): string {
     const data = {
       data: message,
+      kind: EPlannerKind.Ok,
+    };
+
+    return JSON.stringify(data);
+  }
+
+  static fail(message: any): string {
+    const data = {
+      data: message,
+      kind: EPlannerKind.Fail,
     };
 
     return JSON.stringify(data);
@@ -15,6 +25,10 @@ export class SocketMessage {
       kind: EPlannerKind.Ok,
     };
 
+    return JSON.stringify(data);
+  }
+
+  static identity(data: any): string {
     return JSON.stringify(data);
   }
 }

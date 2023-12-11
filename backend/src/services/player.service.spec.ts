@@ -22,15 +22,16 @@ describe("PlayerService", () => {
   it("Should create a Player", async () => {
     const id = new Guid().value;
 
-    await playerService.create({
+    const player = await playerService.create({
       id,
       name: "Alekinho",
       room: null,
     });
 
-    expect(await playerService.findByUserId(id)).toEqual({
+    expect(player).toEqual({
       id,
       name: "Alekinho",
+      room: null,
     });
   });
   it("Should NOT set a room to a player, if room does not exist", async () => {

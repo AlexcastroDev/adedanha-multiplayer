@@ -10,19 +10,29 @@ import {
 import { Server, Socket } from "socket.io";
 import { SocketMessage } from "../Dtos/SocketMessage";
 import { PlayerService } from "../services/player.service";
+import { Guid } from "../Dtos/Guid";
+import { PlayerName } from "../Dtos/PlayerName";
+import { RoomService } from "../services/room.service";
+import { Room } from "../entities/room.entity";
 
 @WebSocketGateway({ cors: true })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private readonly playerService: PlayerService) {}
+  constructor(
+    private readonly playerService: PlayerService,
+    private readonly roomService: RoomService,
+  ) {}
   flagShowAllVotes = false;
   selectedIssue = "";
 
   @WebSocketServer()
   wss: Server;
   handleConnection() {
+    console.log("client connected");
   }
 
   handleDisconnect(client: Socket) {
+    console.log("client left");
+
     setTimeout(() => {
       this.playerService.delete(client.data.id);
       const users = [];
@@ -33,96 +43,42 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }, 5000);
   }
 
-  // @SubscribeMessage("reset-votes")
-  // async handleResetVotes(): Promise<SocketMessage> {
-  //   this.flagShowAllVotes = false;
-  //   await this.playerService.clear();
-  //   this.wss.emit("new-vote", SocketMessage.text([]));
-  //   this.wss.emit("reset", SocketMessage.ok());
-  //   this.wss.emit(
-  //     "show-average",
-  //     SocketMessage.text({ average: 0, votes: [] }),
-  //   );
+  @SubscribeMessage("createRoom")
+  async handleCreateRoom(
+    @ConnectedSocket() client: Socket,
+  ): Promise<SocketMessage> {
+    if (!client.data.id) {
+      return SocketMessage.fail("You must identify yourself first");
+    }
+    const roomId = new Guid().value;
+    const room = new Room(roomId);
+    const roomResult = await this.roomService.create(room);
 
-  //   return SocketMessage.ok();
-  // }
+    if (!roomResult) return SocketMessage.fail("Error creating room");
 
-  // @SubscribeMessage("list-users")
-  // handleAskForUsers(): SocketMessage {
-  //   const users = [];
-  //   this.wss.sockets.sockets.forEach((socket) => {
-  //     if (socket.data?.id) users.push(socket.data.name);
-  //   });
-
-  //   return SocketMessage.text(users);
-  // }
-
-  // @SubscribeMessage("show-average")
-  // async handleShowAverage(): Promise<SocketMessage> {
-  //   this.flagShowAllVotes = true;
-  //   const votes = await this.playerService.findAll();
-  //   let average = 0;
-
-  //   const total = (votes || []).reduce(
-  //     (acc, user) => acc + user?.vote ?? 0,
-  //     0,
-  //   );
-  //   if (votes.length > 0) average = Math.round(total / votes.length);
-
-  //   this.wss.emit(
-  //     "show-average",
-  //     SocketMessage.text({ average, votes }),
-  //   );
-
-  //   return SocketMessage.ok();
-  // }
-
-  // @SubscribeMessage("select-issue")
-  // async handleSelectIssue(
-  //   @MessageBody() data: string,
-  //   @ConnectedSocket() client: Socket,
-  // ): Promise<SocketMessage> {
-  //   if (!client.data.id) {
-  //     return SocketMessage.text("You must identify yourself first");
-  //   }
-
-  //   this.selectedIssue = data;
-  //   this.wss.emit(
-  //     "selected-issue",
-  //     SocketMessage.text(data),
-  //   );
-
-  //   return SocketMessage.ok();
-  // }
-  // @SubscribeMessage("remove-issue")
-  // async handleRemoveIssue(
-  //   @ConnectedSocket() client: Socket,
-  // ): Promise<SocketMessage> {
-  //   if (!client.data.id) {
-  //     return SocketMessage.text("You must identify yourself first");
-  //   }
-  //   this.selectedIssue = "";
-  //   this.wss.emit(
-  //     "selected-issue",
-  //     SocketMessage.text(""),
-  //   );
-
-  //   return SocketMessage.ok();
-  // }
+    return SocketMessage.ok();
+  }
 
   @SubscribeMessage("identify")
   async handleIdentify(
     @MessageBody() data: string,
     @ConnectedSocket() client: Socket,
   ): Promise<SocketMessage> {
-    // const body = JSON.parse(data);
-    // const { name } = body
-    // client.data.id = data;
-    // client.data.name = user.name;
+    const body = JSON.parse(data);
+    const playerName = new PlayerName(body.name);
+    if (!playerName.isValid) return SocketMessage.fail("Invalid name");
 
-    // const id = new Guid().value;
-    // const user = await this.playerService.create(id, );
+    const id = new Guid().value;
+    const player = await this.playerService.create({
+      id,
+      name: playerName.value,
+      room: null,
+    });
 
-    return SocketMessage.ok();
+    if (!player) return SocketMessage.fail("Error creating player");
+
+    client.data.id = id;
+
+    return SocketMessage.identity(player);
   }
 }

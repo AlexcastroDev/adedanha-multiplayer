@@ -3,17 +3,12 @@ import { Player } from "./player.entity";
 
 @Entity()
 export class Room {
-  constructor(id: string, invite: string, players: Player[]) {
+  constructor(id: string) {
     this.id = id;
-    this.invite = invite;
-    this.players = players as Player[];
   }
 
   @PrimaryGeneratedColumn("uuid")
   id: string;
-
-  @Column()
-  invite: string;
 
   @OneToMany(() => Player, (player) => player.room)
   players: Player[];
