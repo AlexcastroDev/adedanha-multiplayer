@@ -6,6 +6,7 @@ import {
   RoomRepositoryName,
 } from "../providers/adedanha.provider";
 import { Room } from "../entities/room.entity";
+import { Nullable } from "src/types/Nullable";
 
 @Injectable()
 export class PlayerService {
@@ -20,6 +21,10 @@ export class PlayerService {
 
   async findAll(): Promise<Player[]> {
     return await this.playerRepository.find();
+  }
+
+  async findPlayersRoom(room_id: string): Promise<Player[]> {
+    return await this.playerRepository.find({ where: { room: room_id } });
   }
 
   async findByUserId(id: string): Promise<Player> {
@@ -41,13 +46,13 @@ export class PlayerService {
     }
   }
 
-  async updatePlayerRoom(id: string, room: string) {
+  async updatePlayerRoom(id: string, room: Nullable<string>) {
     try {
       const hasRoom = await this.roomRepository.findOne({
         where: { id: room },
       });
 
-      if (!hasRoom) {
+      if (!hasRoom && room !== null) {
         return null;
       }
       const document = await this.playerRepository.findOneAndUpdate({

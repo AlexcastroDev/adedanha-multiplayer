@@ -39,55 +39,15 @@ describe("Simulate Game", () => {
     const room = SocketEvent.parse(payload);
 
     deepEqual(room.isOk, true);
+    socket.disconnect()
+  })
+  it("Should leave room", async () => {
+    const { socket } = await createSocket()
+    await socket.emitWithAck("createRoom");
+    const payload = await socket.emitWithAck("leaveRoom");
+    const room = SocketEvent.parse(payload);
 
+    deepEqual(room.isOk, true);
     socket.disconnect();
   })
-
-  // it("should create a room", (done) => {
-  //   const socket = io(socketURL);
-  //   socket.on("connect", () => {
-  //     socket.emit("createRoom", "testRoom");
-  //     socket.on("roomCreated", (room) => {
-  //       expect(room).toBe("testRoom");
-  //       socket.disconnect();
-  //       done();
-  //     });
-  //   });
-  // });
-
-  // it("should join a room", (done) => {
-  //   const socket = io(socketURL);
-  //   socket.on("connect", () => {
-  //     socket.emit("joinRoom", "testRoom");
-  //     socket.on("roomJoined", (room) => {
-  //       expect(room).toBe("testRoom");
-  //       socket.disconnect();
-  //       done();
-  //     });
-  //   });
-  // });
-
-  // it("should leave a room", (done) => {
-  //   const socket = io(socketURL);
-  //   socket.on("connect", () => {
-  //     socket.emit("leaveRoom", "testRoom");
-  //     socket.on("roomLeft", (room) => {
-  //       expect(room).toBe("testRoom");
-  //       socket.disconnect();
-  //       done();
-  //     });
-  //   });
-  // });
-
-  // it("should delete a room", (done) => {
-  //   const socket = io(socketURL);
-  //   socket.on("connect", () => {
-  //     socket.emit("deleteRoom", "testRoom");
-  //     socket.on("roomDeleted", (room) => {
-  //       expect(room).toBe("testRoom");
-  //       socket.disconnect();
-  //       done();
-  //     });
-  //   });
-  // });
 })

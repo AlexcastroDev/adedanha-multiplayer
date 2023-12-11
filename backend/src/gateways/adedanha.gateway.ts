@@ -43,6 +43,39 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }, 5000);
   }
 
+  @SubscribeMessage("updatePlayersAtRoom")
+  async handleListUserRooms(
+    @MessageBody() data: string,
+    @ConnectedSocket() client: Socket,
+  ): Promise<SocketMessage> {
+    if (!client.data.id) {
+      return SocketMessage.fail("You must identify yourself first");
+    }
+    const body = JSON.parse(data);
+    const players = await this.playerService.findPlayersRoom(body);
+
+    if (!players) return SocketMessage.fail("Error listing players");
+
+    return SocketMessage.text(players);
+  }
+
+  @SubscribeMessage("leaveRoom")
+  async handleLeaveRoom(
+    @ConnectedSocket() client: Socket,
+  ): Promise<SocketMessage> {
+    if (!client.data.id) {
+      return SocketMessage.fail("You must identify yourself first");
+    }
+    const player = await this.playerService.updatePlayerRoom(
+      client.data.id,
+      null,
+    );
+
+    if (!player) return SocketMessage.fail("Error leaving room");
+
+    return SocketMessage.ok();
+  }
+
   @SubscribeMessage("createRoom")
   async handleCreateRoom(
     @ConnectedSocket() client: Socket,
@@ -54,7 +87,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const room = new Room(roomId);
     const roomResult = await this.roomService.create(room);
 
-    if (!roomResult) return SocketMessage.fail("Error creating room");
+    const player = await this.playerService.updatePlayerRoom(
+      client.data.id,
+      roomId,
+    );
+
+    if (!player || !roomResult) {
+      return SocketMessage.fail("Error creating room");
+    }
 
     return SocketMessage.ok();
   }

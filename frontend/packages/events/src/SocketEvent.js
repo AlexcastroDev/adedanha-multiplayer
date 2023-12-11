@@ -3,7 +3,6 @@ import { ESocketKind } from "./ESocketKind.js";
 export class SocketEvent {
   constructor(kind, payload) {
     this.kind = kind;
-    console.log("🚀 ~ file: SocketEvent.js:6 ~ SocketEvent ~ constructor ~ this.kind:", this.kind)
     this.payload = payload;
   }
 
