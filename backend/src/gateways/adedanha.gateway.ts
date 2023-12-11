@@ -35,12 +35,17 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     setTimeout(() => {
       this.playerService.delete(client.data.id);
-      const users = [];
-      this.wss.sockets.sockets.forEach((socket) => {
-        if (socket.data?.id) users.push(socket.data.name);
-      });
-      this.wss.emit("users", SocketMessage.text(users));
+
+      // this is trash, but let this here for now
+      // const users = [];
+      // this.wss.sockets.sockets.forEach((socket) => {
+      //   if (socket.data?.id) users.push(socket.data.name);
+      // });
     }, 5000);
+  }
+
+  broadcast(event: string, data: any) {
+    this.wss.emit(event, data);
   }
 
   @SubscribeMessage("updatePlayersAtRoom")
@@ -95,6 +100,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!player || !roomResult) {
       return SocketMessage.fail("Error creating room");
     }
+
+    // Move this to an event
+    const rooms = await this.roomService.findAll();
+    this.broadcast("roomCreated", rooms);
 
     return SocketMessage.ok();
   }

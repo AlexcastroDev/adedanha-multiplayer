@@ -1,5 +1,5 @@
-declare module "./identityEmitter" {
-  export class identityEmitter {
+declare module "@internal/events" {
+  export class IdentityEmitter {
     id: string;
     name: string;
 
