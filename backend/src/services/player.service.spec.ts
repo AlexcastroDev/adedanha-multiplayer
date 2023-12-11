@@ -6,14 +6,15 @@ import { Guid } from "../Dtos/Guid";
 describe("PlayerService", () => {
   let playerService: PlayerService;
   let app: TestingModule;
-  beforeEach(async () => {
-    if (playerService) return;
+
+  beforeAll(async () => {
     app = await Test.createTestingModule({
       imports: [GameModule],
     }).compile();
 
     playerService = app.get<PlayerService>(PlayerService);
   });
+
   afterEach(async () => {
     app.close();
   });

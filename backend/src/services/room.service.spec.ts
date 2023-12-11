@@ -9,8 +9,7 @@ describe("PlayerService", () => {
   let roomService: RoomService;
   let app: TestingModule;
 
-  beforeEach(async () => {
-    if (playerService) return;
+  beforeAll(async () => {
     app = await Test.createTestingModule({
       imports: [GameModule],
     }).compile();
