@@ -1,13 +1,20 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { MongoRepository } from "typeorm";
 import { Player } from "../entities/player.entity";
-import { PlayerRepositoryName } from "../providers/adedanha.provider";
+import {
+  PlayerRepositoryName,
+  RoomRepositoryName,
+} from "../providers/adedanha.provider";
+import { Room } from "@/entities/room.entity";
 
 @Injectable()
 export class PlayerService {
   constructor(
     @Inject(PlayerRepositoryName) private playerRepository: MongoRepository<
       Player
+    >,
+    @Inject(RoomRepositoryName) private roomRepository: MongoRepository<
+      Room
     >,
   ) {}
 
@@ -31,6 +38,13 @@ export class PlayerService {
 
   async updatePlayerRoom(id: string, room: string) {
     try {
+      const hasRoom = await this.roomRepository.findOne({
+        where: { id: room },
+      });
+
+      if (!hasRoom) {
+        return null;
+      }
       const document = await this.playerRepository.findOneAndUpdate({
         id,
       }, {
@@ -49,11 +63,7 @@ export class PlayerService {
     }
   }
 
-  async clear() {
-    return this.playerRepository.clear();
-  }
-
-  async deleteByUserId(id: string) {
+  async delete(id: string) {
     return this.playerRepository.delete({ id });
   }
 }

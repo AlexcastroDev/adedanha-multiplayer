@@ -24,7 +24,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: Socket) {
     setTimeout(() => {
-      this.playerService.deleteByUserId(client.data.id);
+      this.playerService.delete(client.data.id);
       const users = [];
       this.wss.sockets.sockets.forEach((socket) => {
         if (socket.data?.id) users.push(socket.data.name);

@@ -2,10 +2,13 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { GameModule } from "../modules/adedanha.module";
 import { PlayerService } from "./player.service";
 import { Guid } from "../Dtos/Guid";
+import { RoomService } from "./room.service";
 
 describe("PlayerService", () => {
   let playerService: PlayerService;
+  let roomService: RoomService;
   let app: TestingModule;
+
   beforeEach(async () => {
     if (playerService) return;
     app = await Test.createTestingModule({
@@ -13,26 +16,28 @@ describe("PlayerService", () => {
     }).compile();
 
     playerService = app.get<PlayerService>(PlayerService);
+    roomService = app.get<RoomService>(RoomService);
   });
   afterEach(async () => {
     app.close();
   });
 
-  it("Should create a Player", async () => {
+  it("Should create a room", async () => {
     const id = new Guid().value;
+    const invite = new Guid().value;
 
-    await playerService.create({
+    await roomService.create({
       id,
-      name: "Alekinho",
-      room: null,
+      invite,
+      players: [],
     });
 
-    expect(await playerService.findByUserId(id)).toEqual({
+    expect(await roomService.findById(id)).toEqual({
       id,
-      name: "Alekinho",
+      invite,
     });
   });
-  it("Should NOT set a room to a player, if room does not exist", async () => {
+  it("Should set a room to a player", async () => {
     const id = new Guid().value;
     const room_id = new Guid().value;
 
@@ -41,18 +46,28 @@ describe("PlayerService", () => {
       name: "Alekinho hub",
       room: null,
     });
+    await roomService.create({
+      id: room_id,
+      invite: "123",
+      players: [],
+    });
 
     const player = await playerService.updatePlayerRoom(id, room_id);
 
-    expect(player).toEqual(null);
-  });
-  it("Should delete player register", async () => {
-    const id = new Guid().value;
-
-    await playerService.create({
+    expect(player).toEqual({
       id,
       name: "Alekinho hub",
-      room: null,
+      room: room_id,
+    });
+  });
+  it("Should delete room register", async () => {
+    const id = new Guid().value;
+    const invite = new Guid().value;
+
+    await roomService.create({
+      id,
+      invite,
+      players: [],
     });
 
     await playerService.delete(id);
