@@ -2,17 +2,20 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { GameModule } from "../modules/adedanha.module";
 import { PlayerService } from "./player.service";
 import { Guid } from "../Dtos/Guid";
-import { Room } from "src/entities/room.entity";
 
 describe("PlayerService", () => {
   let playerService: PlayerService;
-
+  let app: TestingModule;
   beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
+    if (playerService) return;
+    app = await Test.createTestingModule({
       imports: [GameModule],
     }).compile();
 
     playerService = app.get<PlayerService>(PlayerService);
+  });
+  afterEach(async () => {
+    app.close();
   });
 
   it("Should create a Player", async () => {
@@ -31,19 +34,20 @@ describe("PlayerService", () => {
   });
   it("Should set a room to a player", async () => {
     const id = new Guid().value;
-    const room = new Guid().value;
+    const room_id = new Guid().value;
 
     await playerService.create({
       id,
-      name: "Alekinho",
+      name: "Alekinho hub",
       room: null,
     });
 
-    await playerService.updatePlayerRoom(id, room);
+    const player = await playerService.updatePlayerRoom(id, room_id);
 
-    expect(await playerService.findByUserId(id)).toEqual({
+    expect(player).toEqual({
       id,
-      name: "Alekinho",
+      name: "Alekinho hub",
+      room: room_id,
     });
   });
 });

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { MongoRepository, ObjectId, Repository } from "typeorm";
+import { MongoRepository } from "typeorm";
 import { Player } from "../entities/player.entity";
 import { PlayerRepositoryName } from "../providers/adedanha.provider";
 
@@ -19,9 +19,9 @@ export class PlayerService {
     return this.playerRepository.findOne({ where: { id } });
   }
 
-  async create(planner: Player): Promise<Player> {
+  async create(payload: Player): Promise<Player> {
     try {
-      const doc = await this.playerRepository.insertOne(planner);
+      const doc = await this.playerRepository.insertOne(payload);
       const player = this.findByUserId(String(doc.insertedId));
       return player;
     } catch {
@@ -30,9 +30,23 @@ export class PlayerService {
   }
 
   async updatePlayerRoom(id: string, room: string) {
-    return this.playerRepository.update(id, {
-      room: () => room,
-    });
+    try {
+      const document = await this.playerRepository.findOneAndUpdate({
+        id,
+      }, {
+        $set: {
+          room: room,
+        },
+      }, { returnDocument: "after" });
+
+      return new Player(
+        document.value.id,
+        document.value.name,
+        document.value.room,
+      );
+    } catch (e) {
+      return null;
+    }
   }
 
   async clear() {
