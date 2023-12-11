@@ -45,7 +45,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   broadcast(event: string, data: any) {
-    this.wss.emit(event, data);
+    this.wss.emit(event, SocketMessage.text(data));
   }
 
   @SubscribeMessage("updatePlayersAtRoom")

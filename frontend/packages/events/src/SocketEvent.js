@@ -12,6 +12,7 @@ export class SocketEvent {
 
   static parse(data) {
     const parsed = JSON.parse(data);
+    console.log("🚀 ~ file: SocketEvent.js:15 ~ SocketEvent ~ parse ~ parsed:", parsed)
 
     return new SocketEvent(parsed.kind, parsed.payload);
   }

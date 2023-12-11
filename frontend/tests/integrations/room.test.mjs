@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { describe, it } from "node:test";
+import { test, describe, it } from "node:test";
 import { deepEqual, notDeepEqual } from "node:assert";
 import { IdentityEmitter, SocketEvent } from "@internal/events";
 
@@ -50,4 +50,22 @@ describe("Simulate Game", () => {
     deepEqual(room.isOk, true);
     socket.disconnect();
   })
+})
+
+test("Multiplayer should update rooms", async () => {
+  const { socket } = await createSocket()
+  const { socket: socket2 } = await createSocket()
+
+  socket.on("roomCreated", (data) => {
+    const rooms = SocketEvent.parse(data);
+    deepEqual(rooms.isOk, true);
+  })
+  socket2.on("roomCreated", (data) => {
+    const rooms = SocketEvent.parse(data);
+    deepEqual(rooms.isOk, true);
+  })
+
+  await socket.emitWithAck("createRoom");
+  socket.disconnect();
+  socket2.disconnect();
 })
