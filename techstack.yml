@@ -2,7 +2,7 @@ repo_name: AlexcastroDev/adedanha-multiplayer
 report_id: 1077f0cfbb581f11eed7f191bd8246e4
 version: 0.1
 repo_type: Public
-timestamp: '2024-01-05T08:12:07+00:00'
+timestamp: '2024-02-29T19:23:24+00:00'
 requested_by: AlexcastroDev
 provider: github
 branch: main
@@ -254,7 +254,7 @@ tools:
   last_updated_by: Alex Oliveira
   last_updated_on: 2023-12-11 09:14:06.000000000 Z
 - name: Prettier
-  description: 'Prettier is an opinionated code formatter. '
+  description: Prettier is an opinionated code formatter.
   website_url: https://prettier.io/
   version: 2.8.8
   license: MIT
@@ -280,7 +280,7 @@ tools:
   last_updated_by: Alex Oliveira
   last_updated_on: 2023-12-11 09:14:06.000000000 Z
 - name: SuperTest
-  description: 'A library for testing node.js HTTP servers '
+  description: A library for testing node.js HTTP servers
   website_url: https://www.npmjs.com/package/supertest
   version: 6.3.3
   license: MIT
